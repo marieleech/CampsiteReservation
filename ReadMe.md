@@ -89,3 +89,6 @@
     
     If there are availabilities, a list of possible dates will be returned to the user.
     If there are no dates available, an appropriate message will be returned.
+
+Things of note:
+There is a PostgreSQL database up and running on Heroku, so if you want to play with the application there is a live database ready!
