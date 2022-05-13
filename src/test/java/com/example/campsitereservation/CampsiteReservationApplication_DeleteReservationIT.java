@@ -1,7 +1,5 @@
 package com.example.campsitereservation;
 
-import java.time.LocalDate;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CampsiteReservationApplication_DeleteReservationIT extends CampsiteReservationApplicationIT{
 
-	private String bookingReference;
-
+	private String bookingReference = createReservation();
 	@Test
 	public void deleteReservationShouldReturn200() {
-		createReservation();
 		ResponseEntity<String> responseEntity = restTemplate.exchange(
 				"http://localhost:" + port + String.format("/reservations/%s", bookingReference),
 				HttpMethod.DELETE,
@@ -32,20 +28,5 @@ public class CampsiteReservationApplication_DeleteReservationIT extends Campsite
 
 		assertEquals(404, responseEntity.getStatusCodeValue());
 
-	}
-
-	private void createReservation() {
-		String responseEntity = restTemplate
-				.postForEntity(
-						"http://localhost:" + port + "/reservations",
-						buildCreateReservationRequestEntity(
-								"sampleEmail@email.com",
-								"FirstName",
-								"LastName",
-								LocalDate.now().plusDays(2),
-								LocalDate.now().plusDays(5)
-						),
-						String.class).getBody();
-		bookingReference = responseEntity.substring(responseEntity.lastIndexOf(": ")+1).replaceAll("\\s+","");
 	}
 }

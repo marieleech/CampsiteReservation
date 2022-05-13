@@ -30,6 +30,7 @@ public class CampsiteReservationApplication_CreateReservationIT extends Campsite
 
 	@Test
 	public void createReservationShouldReturn400WhenDatesNotAvailable() {
+		createReservationWithDates(LocalDate.now().plusDays(3), LocalDate.now().plusDays(6));
 		ResponseEntity responseEntity = this.restTemplate
 				.postForEntity(
 						"http://localhost:" + port + "/reservations",

@@ -44,17 +44,4 @@ public class CampsiteReservationApplication_FetchAvailabilitiesIT extends Campsi
 		assertEquals(200, responseEntity.getStatusCodeValue());
 		assertTrue(responseEntity.getBody().contains("There are no availabilities in your given time range."));
 	}
-
-	private void createReservation() {
-		restTemplate
-				.postForEntity(
-						"http://localhost:" + port + "/reservations",
-						buildCreateReservationRequestEntity(
-								"sampleEmail@email.com",
-								"FirstName",
-								"LastName",
-								LocalDate.now().plusDays(3),
-								LocalDate.now().plusDays(5)),
-						String.class);
-	}
 }

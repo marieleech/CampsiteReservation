@@ -3,6 +3,7 @@ package com.example.campsitereservation.entities;
 
 import java.time.LocalDate;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -23,8 +24,9 @@ public class Reservation {
     @Id
     @GeneratedValue
     private Long id;
-
     private String bookingReference;
+
+    @Column(unique = true)
     private LocalDate reservationDate;
     private String email;
     private String firstName;

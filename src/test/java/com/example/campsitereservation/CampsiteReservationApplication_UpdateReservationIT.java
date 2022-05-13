@@ -12,8 +12,7 @@ public class CampsiteReservationApplication_UpdateReservationIT extends Campsite
 
 	@Test
 	public void updateUserInfoShouldReturn200() {
-		String bookingReference = createReservation(LocalDate.now().plusDays(3), LocalDate.now().plusDays(5));
-		System.out.println(bookingReference);
+		String bookingReference = createReservationWithDates(LocalDate.now().plusDays(3), LocalDate.now().plusDays(5));
 		ResponseEntity<String> responseEntity = restTemplate.exchange(
 				"http://localhost:" + port + String.format("/reservations/%s", bookingReference),
 				HttpMethod.PUT,
@@ -26,14 +25,12 @@ public class CampsiteReservationApplication_UpdateReservationIT extends Campsite
 				),
 				String.class);
 
-		System.out.println(responseEntity.toString());
-
 		assertEquals(200, responseEntity.getStatusCodeValue());
 	}
 
 	@Test
 	public void updateDatesShouldReturn200() {
-		String bookingReference = createReservation(LocalDate.now().plusWeeks(1), LocalDate.now().plusWeeks(1).plusDays(3));
+		String bookingReference = createReservationWithDates(LocalDate.now().plusWeeks(1), LocalDate.now().plusWeeks(1).plusDays(3));
 		ResponseEntity<String> responseEntity = restTemplate.exchange(
 				"http://localhost:" + port + String.format("/reservations/%s", bookingReference),
 				HttpMethod.PUT,
@@ -47,8 +44,8 @@ public class CampsiteReservationApplication_UpdateReservationIT extends Campsite
 
 	@Test
 	public void updateDatesShouldReturn400WhenChangedDatesAreInvalid() {
-		String bookingReference = createReservation(LocalDate.now().plusWeeks(2), LocalDate.now().plusWeeks(2).plusDays(5));
-		createReservation(LocalDate.now().plusWeeks(2).plusDays(7), LocalDate.now().plusWeeks(2).plusDays(10));
+		String bookingReference = createReservationWithDates(LocalDate.now().plusWeeks(2), LocalDate.now().plusWeeks(2).plusDays(5));
+		createReservationWithDates(LocalDate.now().plusWeeks(2).plusDays(7), LocalDate.now().plusWeeks(2).plusDays(10));
 
 		ResponseEntity<String> responseEntity = restTemplate.exchange(
 				"http://localhost:" + port + String.format("/reservations/%s", bookingReference),
@@ -60,19 +57,5 @@ public class CampsiteReservationApplication_UpdateReservationIT extends Campsite
 				String.class);
 
 		assertEquals(400, responseEntity.getStatusCodeValue());
-	}
-
-	private String createReservation(LocalDate checkIn, LocalDate checkOut) {
-		String responseEntity = restTemplate
-				.postForEntity(
-						"http://localhost:" + port + "/reservations",
-						buildCreateReservationRequestEntity(
-								"sampleEmail@email.com",
-								"FirstName",
-								"LastName",
-								checkIn,
-								checkOut),
-						String.class).getBody();
-		return responseEntity.substring(responseEntity.lastIndexOf(": ")+1).replaceAll("\\s+","");
 	}
 }
