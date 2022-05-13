@@ -12,6 +12,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.example.campsitereservation.beans.ReservationBean;
+
 @Data
 @Entity
 @NoArgsConstructor
@@ -27,4 +29,8 @@ public class Reservation {
     private String email;
     private String firstName;
     private String lastName;
+
+    public ReservationBean getReservationBean() {
+        return new ReservationBean(this.id, this.bookingReference, this.reservationDate, this.email, this.firstName, this.lastName);
+    }
 }

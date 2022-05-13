@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.campsitereservation.beans.ReservationBean;
 import com.example.campsitereservation.entities.DateRangeDto;
-import com.example.campsitereservation.entities.Reservation;
 import com.example.campsitereservation.entities.ReservationDto;
 import com.example.campsitereservation.errors.InvalidReservationDates;
 import com.example.campsitereservation.errors.InvalidReservationInput;
@@ -40,10 +40,10 @@ public class CampsiteReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<String> createReservation(@RequestBody ReservationDto reservationDto) {
-        Reservation reservation = new Reservation();
+        ReservationBean reservationBean = new ReservationBean();
         try {
             if (checkReservation(reservationDto.getCheckInDate(), reservationDto.getCheckOutDate())) {
-                reservation = saveReservation(reservationDto);
+                reservationBean = saveReservation(reservationDto);
             }
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.badRequest().body("These reservation dates are not available. Please choose another date.");
@@ -52,12 +52,12 @@ public class CampsiteReservationController {
         } catch (InvalidReservationInput e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok().body(String.format("Reservation successful! Here is your booking reference number: %s", reservation.getBookingReference()));
+        return ResponseEntity.ok().body(String.format("Reservation successful! Here is your booking reference number: %s", reservationBean.getBookingReference()));
     }
 
     @PutMapping("/reservations/{bookingReference}")
     public ResponseEntity<?> updateReservation(@PathVariable String bookingReference, @RequestBody ReservationDto reservationDto) {
-        Optional<Reservation> existingReservationOpt = campsiteReservationService.findFirstByBookingReference(bookingReference);
+        Optional<ReservationBean> existingReservationOpt = campsiteReservationService.findFirstByBookingReference(bookingReference);
 
         if (!existingReservationOpt.isPresent()) {
             return ResponseEntity.badRequest().body("Reservation with this booking reference does not exist.");
@@ -127,35 +127,35 @@ public class CampsiteReservationController {
         }
     }
 
-    private Reservation saveReservation(ReservationDto reservationDto) throws InvalidReservationInput {
+    private ReservationBean saveReservation(ReservationDto reservationDto) throws InvalidReservationInput {
         List<LocalDate> dates = getDates(reservationDto.getCheckInDate(), reservationDto.getCheckOutDate());
-        List<Reservation> reservations = new ArrayList<>();
+        List<ReservationBean> reservationBeans = new ArrayList<>();
         String bookingReference = UUID.randomUUID().toString();
         validateNameAndEmail(reservationDto.getFirstName(), reservationDto.getLastName(), reservationDto.getEmail());
 
         for (LocalDate date : dates) {
-            Reservation reservation = new Reservation();
+            ReservationBean reservation = new ReservationBean();
             reservation.setBookingReference(bookingReference);
             reservation.setFirstName(reservationDto.getFirstName());
             reservation.setLastName(reservationDto.getLastName());
             reservation.setEmail(reservationDto.getEmail());
             reservation.setReservationDate(date);
-            reservations.add(reservation);
+            reservationBeans.add(reservation);
         }
 
-        campsiteReservationService.saveAllReservations(reservations);
-        return reservations.get(0);
+        campsiteReservationService.saveAllReservations(reservationBeans);
+        return reservationBeans.get(0);
     }
 
-    private void updateReservation(ReservationDto reservationDto, Reservation existingReservation) throws InvalidReservationInput, InvalidReservationDates {
+    private void updateReservation(ReservationDto reservationDto, ReservationBean existingReservationBean) throws InvalidReservationInput, InvalidReservationDates {
         if (newDatesProvided(reservationDto)) {
             if (checkReservation(reservationDto.getCheckInDate(), reservationDto.getCheckOutDate())) {
-                campsiteReservationService.updateReservationDates(existingReservation.getBookingReference(), getDates(reservationDto.getCheckInDate(), reservationDto.getCheckOutDate()));
+                campsiteReservationService.updateReservationDates(existingReservationBean.getBookingReference(), getDates(reservationDto.getCheckInDate(), reservationDto.getCheckOutDate()));
             };
         }
 
         if (newUserInfoProvided(reservationDto)) {
-            Reservation updatedUserInfoReservation = updateUserInfo(existingReservation, reservationDto);
+            ReservationBean updatedUserInfoReservation = updateUserInfo(existingReservationBean, reservationDto);
             campsiteReservationService.updateReservationUserInfo(updatedUserInfoReservation.getLastName(), updatedUserInfoReservation.getFirstName(), updatedUserInfoReservation.getEmail(), updatedUserInfoReservation.getBookingReference());
         }
     }
@@ -184,18 +184,18 @@ public class CampsiteReservationController {
         return true;
     }
 
-    private Reservation updateUserInfo(Reservation reservation, ReservationDto reservationDto) {
+    private ReservationBean updateUserInfo(ReservationBean reservationBean, ReservationDto reservationDto) {
         if (!reservationDto.getEmail().isEmpty()) {
-            reservation.setEmail(reservationDto.getEmail());
+            reservationBean.setEmail(reservationDto.getEmail());
         }
         if (!reservationDto.getFirstName().isEmpty()){
-            reservation.setFirstName(reservationDto.getFirstName());
+            reservationBean.setFirstName(reservationDto.getFirstName());
         }
         if (!reservationDto.getLastName().isEmpty()){
-            reservation.setLastName(reservationDto.getLastName());
+            reservationBean.setLastName(reservationDto.getLastName());
         }
 
-        return reservation;
+        return reservationBean;
     }
 
     private List<LocalDate> getAvailableDates(LocalDate start, LocalDate end) {

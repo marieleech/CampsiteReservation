@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.campsitereservation.CampsiteReservationRepository;
+import com.example.campsitereservation.beans.ReservationBean;
 import com.example.campsitereservation.entities.Reservation;
 
 @Service
@@ -25,7 +26,7 @@ public class CampsiteReservationService {
 
 	@Transactional
 	public void updateReservationDates(String bookingReference, List<LocalDate> newDates) {
-		List<Reservation> existingReservations = findByBookingReference(bookingReference);
+		List<ReservationBean> existingReservations = findByBookingReference(bookingReference);
 		List<LocalDate> existingDates = existingReservations.stream().map(reservation -> reservation.getReservationDate()).collect(Collectors.toList());
 		List<LocalDate> unwantedDates = new ArrayList<>(existingDates);
 		List<LocalDate> newDatesToAdd = new ArrayList<>(newDates);
@@ -51,7 +52,7 @@ public class CampsiteReservationService {
 	}
 
 	@Transactional
-	public void updateReservationUserInfo(String lastName, String firstName, String email, String bookingReference){
+	public void updateReservationUserInfo(String lastName, String firstName, String email, String bookingReference) {
 		repository.updateReservationUserInfo(lastName, firstName, email, bookingReference);
 	}
 
@@ -60,24 +61,19 @@ public class CampsiteReservationService {
 		repository.deleteReservationByBookingReference(bookingReference);
 	}
 
-	public Optional<Reservation> findFirstByBookingReference(String bookingReference) {
-		return repository.findFirstByBookingReference(bookingReference);
+	public Optional<ReservationBean> findFirstByBookingReference(String bookingReference) {
+		return repository.findFirstByBookingReference(bookingReference).map(Reservation::getReservationBean);
 	}
 
-	public List<Reservation> findByBookingReference(String bookingReference) {
-		return repository.findByBookingReference(bookingReference);
+	public List<ReservationBean> findByBookingReference(String bookingReference) {
+		return repository.findByBookingReference(bookingReference).stream().map(reservation -> reservation.getReservationBean()).collect(Collectors.toList());
 	}
 
 	public void deleteReservationByReservationDate(LocalDate date) {
 		repository.deleteReservationByReservationDate(date);
 	}
 
-	public void saveAllReservations(List<Reservation> reservations) {
-		repository.saveAll(reservations);
+	public void saveAllReservations(List<ReservationBean> reservations) {
+		repository.saveAll(reservations.stream().map(bean -> bean.getReservation()).collect(Collectors.toList()));
 	}
-
-	public List<Reservation> findAll() {
-		return repository.findAll();
-	}
-
 }

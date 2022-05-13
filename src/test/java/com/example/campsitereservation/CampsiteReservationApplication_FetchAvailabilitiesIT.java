@@ -40,7 +40,7 @@ public class CampsiteReservationApplication_FetchAvailabilitiesIT extends Campsi
 				String.class,
 				buildDateRangeEntity(LocalDate.now().plusDays(3), LocalDate.now().plusDays(5))
 		);
-		System.out.println(responseEntity);
+
 		assertEquals(200, responseEntity.getStatusCodeValue());
 		assertTrue(responseEntity.getBody().contains("There are no availabilities in your given time range."));
 	}
